@@ -279,54 +279,91 @@ public:
 int main() {
     cout << "Final Code Generator (Assembly Code Generation)" << endl;
     cout << "===============================================" << endl;
+    cout << "Choose an option:" << endl;
+    cout << "1. Simple Expression: a = b + c * d" << endl;
+    cout << "2. Complex Expression: x = (a + b) * (c - d)" << endl;
+    cout << "3. Expression with Constants: y = 5 * x + 10" << endl;
+    cout << "4. Custom Three Address Code Input" << endl;
     
     FinalCodeGenerator generator;
+    int choice;
     
-    // Example 1: Simple arithmetic expression a = b + c * d
-    cout << "Example 1: a = b + c * d" << endl;
-    cout << "------------------------" << endl;
-    
-    generator.addIntermediateCode("*", "c", "d", "t1");
-    generator.addIntermediateCode("+", "b", "t1", "t2");
-    generator.addIntermediateCode("=", "t2", "", "a");
-    
-    generator.printIntermediateCode();
-    generator.generateAssemblyCode();
-    generator.printAssemblyCode();
-    generator.printRegisterAllocation();
-    
-    generator.clear();
-    cout << string(60, '=') << endl;
-    
-    // Example 2: More complex expression x = (a + b) * (c - d)
-    cout << "Example 2: x = (a + b) * (c - d)" << endl;
-    cout << "---------------------------------" << endl;
-    
-    generator.addIntermediateCode("+", "a", "b", "t1");
-    generator.addIntermediateCode("-", "c", "d", "t2");
-    generator.addIntermediateCode("*", "t1", "t2", "t3");
-    generator.addIntermediateCode("=", "t3", "", "x");
-    
-    generator.printIntermediateCode();
-    generator.generateAssemblyCode();
-    generator.printAssemblyCode();
-    generator.printRegisterAllocation();
-    
-    generator.clear();
-    cout << string(60, '=') << endl;
-    
-    // Example 3: Assignment with constants
-    cout << "Example 3: y = 5 * x + 10" << endl;
-    cout << "-------------------------" << endl;
-    
-    generator.addIntermediateCode("*", "5", "x", "t1");
-    generator.addIntermediateCode("+", "t1", "10", "t2");
-    generator.addIntermediateCode("=", "t2", "", "y");
-    
-    generator.printIntermediateCode();
-    generator.generateAssemblyCode();
-    generator.printAssemblyCode();
-    generator.printRegisterAllocation();
+    while (true) {
+        cout << "\nEnter choice (1-4, 0 to exit): ";
+        cin >> choice;
+        
+        switch (choice) {
+            case 0:
+                cout << "Exiting..." << endl;
+                return 0;
+                
+            case 1:
+                cout << "\nGenerating assembly for: a = b + c * d" << endl;
+                cout << "--------------------------------------" << endl;
+                generator.addIntermediateCode("*", "c", "d", "t1");
+                generator.addIntermediateCode("+", "b", "t1", "t2");
+                generator.addIntermediateCode("=", "t2", "", "a");
+                break;
+                
+            case 2:
+                cout << "\nGenerating assembly for: x = (a + b) * (c - d)" << endl;
+                cout << "----------------------------------------------" << endl;
+                generator.addIntermediateCode("+", "a", "b", "t1");
+                generator.addIntermediateCode("-", "c", "d", "t2");
+                generator.addIntermediateCode("*", "t1", "t2", "t3");
+                generator.addIntermediateCode("=", "t3", "", "x");
+                break;
+                
+            case 3:
+                cout << "\nGenerating assembly for: y = 5 * x + 10" << endl;
+                cout << "---------------------------------------" << endl;
+                generator.addIntermediateCode("*", "5", "x", "t1");
+                generator.addIntermediateCode("+", "t1", "10", "t2");
+                generator.addIntermediateCode("=", "t2", "", "y");
+                break;
+                
+            case 4:
+                cout << "\nCustom TAC input:" << endl;
+                cout << "Enter number of TAC instructions: ";
+                int n;
+                cin >> n;
+                
+                for (int i = 0; i < n; i++) {
+                    string op, arg1, arg2, result;
+                    cout << "Instruction " << (i+1) << ":" << endl;
+                    cout << "Operator (+, -, *, =): ";
+                    cin >> op;
+                    cout << "First operand: ";
+                    cin >> arg1;
+                    
+                    if (op != "=") {
+                        cout << "Second operand: ";
+                        cin >> arg2;
+                    } else {
+                        arg2 = "";
+                    }
+                    
+                    cout << "Result variable: ";
+                    cin >> result;
+                    
+                    generator.addIntermediateCode(op, arg1, arg2, result);
+                }
+                break;
+                
+            default:
+                cout << "Invalid choice! Please enter 1-4 or 0 to exit." << endl;
+                continue;
+        }
+        
+        if (choice >= 1 && choice <= 4) {
+            cout << "\n";
+            generator.printIntermediateCode();
+            generator.generateAssemblyCode();
+            generator.printAssemblyCode();
+            generator.printRegisterAllocation();
+            generator.clear();
+        }
+    }
     
     return 0;
 }

@@ -206,45 +206,63 @@ public:
 int main() {
     cout << "Intermediate Code Generator" << endl;
     cout << "===========================" << endl;
+    cout << "Choose an option:" << endl;
+    cout << "1. Arithmetic Expression (a = b + c * d)" << endl;
+    cout << "2. Array Access (a[i] = b[j] + c)" << endl;
+    cout << "3. Conditional Statement (if-else)" << endl;
+    cout << "4. While Loop" << endl;
+    cout << "5. Function Call" << endl;
+    cout << "6. Custom Expression" << endl;
     
     IntermediateCodeGenerator generator;
+    int choice;
     
-    // Example 1: Simple arithmetic expression
-    cout << "Example 1: Arithmetic Expression" << endl;
-    cout << "--------------------------------" << endl;
-    generator.generateArithmeticExpression();
-    generator.clear();
-    
-    cout << string(60, '=') << endl;
-    
-    // Example 2: Array access
-    cout << "Example 2: Array Access" << endl;
-    cout << "-----------------------" << endl;
-    generator.generateArrayAccess();
-    generator.clear();
-    
-    cout << string(60, '=') << endl;
-    
-    // Example 3: Conditional statement
-    cout << "Example 3: Conditional Statement" << endl;
-    cout << "--------------------------------" << endl;
-    generator.generateConditional();
-    generator.clear();
-    
-    cout << string(60, '=') << endl;
-    
-    // Example 4: While loop
-    cout << "Example 4: While Loop" << endl;
-    cout << "---------------------" << endl;
-    generator.generateWhileLoop();
-    generator.clear();
-    
-    cout << string(60, '=') << endl;
-    
-    // Example 5: Function call
-    cout << "Example 5: Function Call" << endl;
-    cout << "------------------------" << endl;
-    generator.generateFunctionCall();
+    while (true) {
+        cout << "\nEnter choice (1-6, 0 to exit): ";
+        cin >> choice;
+        
+        switch (choice) {
+            case 0:
+                cout << "Exiting..." << endl;
+                return 0;
+                
+            case 1:
+                cout << "\nGenerating code for: a = b + c * d" << endl;
+                generator.generateArithmeticExpression();
+                break;
+                
+            case 2:
+                cout << "\nGenerating code for: a[i] = b[j] + c" << endl;
+                generator.generateArrayAccess();
+                break;
+                
+            case 3:
+                cout << "\nGenerating code for: if (a > b) x = y; else x = z;" << endl;
+                generator.generateConditional();
+                break;
+                
+            case 4:
+                cout << "\nGenerating code for: while (i < n) { sum = sum + a[i]; i = i + 1; }" << endl;
+                generator.generateWhileLoop();
+                break;
+                
+            case 5:
+                cout << "\nGenerating code for: result = func(a, b, c)" << endl;
+                generator.generateFunctionCall();
+                break;
+                
+            case 6:
+                cout << "\nCustom expression generator not implemented in this version." << endl;
+                cout << "Use options 1-5 for predefined expressions." << endl;
+                break;
+                
+            default:
+                cout << "Invalid choice! Please enter 1-6 or 0 to exit." << endl;
+                continue;
+        }
+        
+        generator.clear();
+    }
     
     return 0;
 }

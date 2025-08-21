@@ -130,50 +130,61 @@ public:
 int main() {
     cout << "FIRST Set Calculator for Context-Free Grammars" << endl;
     cout << "===============================================" << endl;
+    cout << "Enter grammar productions (Enter 'done' to finish)" << endl;
+    cout << "Format: A->BC or A->a or A->ε" << endl;
+    cout << "Use 'ε' for epsilon productions" << endl << endl;
     
     FirstCalculator calc;
+    string production;
     
-    // Example Grammar 1: Simple grammar
-    cout << "Example 1:" << endl;
-    calc.addProduction('S', "AB");
-    calc.addProduction('A', "a");
-    calc.addProduction('A', "ε");
-    calc.addProduction('B', "b");
-    calc.addProduction('B', "c");
+    while (true) {
+        cout << "Enter production: ";
+        cin >> production;
+        
+        if (production == "done") break;
+        
+        // Parse production A->BC
+        size_t arrowPos = production.find("->");
+        if (arrowPos == string::npos) {
+            cout << "Invalid format! Use A->BC" << endl;
+            continue;
+        }
+        
+        char lhs = production[0];
+        string rhs = production.substr(arrowPos + 2);
+        
+        calc.addProduction(lhs, rhs);
+        cout << "Added: " << lhs << " -> " << rhs << endl;
+    }
     
+    cout << "\n";
     calc.printGrammar();
     calc.calculateFirst();
     calc.printFirst();
     
-    cout << "\n" << string(50, '=') << "\n" << endl;
+    // Allow user to query specific non-terminals
+    char nt;
+    char choice;
+    cout << "\nDo you want to query FIRST of specific non-terminal? (y/n): ";
+    cin >> choice;
     
-    // Example Grammar 2: More complex grammar
-    cout << "Example 2:" << endl;
-    FirstCalculator calc2;
-    calc2.addProduction('E', "TX");
-    calc2.addProduction('X', "+TX");
-    calc2.addProduction('X', "ε");
-    calc2.addProduction('T', "FY");
-    calc2.addProduction('Y', "*FY");
-    calc2.addProduction('Y', "ε");
-    calc2.addProduction('F', "(E)");
-    calc2.addProduction('F', "id");
-    
-    calc2.printGrammar();
-    calc2.calculateFirst();
-    calc2.printFirst();
-    
-    cout << "\n" << string(50, '=') << "\n" << endl;
-    
-    // Example Grammar 3: Grammar with left recursion
-    cout << "Example 3:" << endl;
-    FirstCalculator calc3;
-    calc3.addProduction('S', "Sa");
-    calc3.addProduction('S', "b");
-    
-    calc3.printGrammar();
-    calc3.calculateFirst();
-    calc3.printFirst();
+    while (choice == 'y' || choice == 'Y') {
+        cout << "Enter non-terminal: ";
+        cin >> nt;
+        
+        set<char> firstSet = calc.getFirst(nt);
+        cout << "FIRST(" << nt << ") = {";
+        bool first = true;
+        for (char symbol : firstSet) {
+            if (!first) cout << ", ";
+            cout << symbol;
+            first = false;
+        }
+        cout << "}" << endl;
+        
+        cout << "Query another? (y/n): ";
+        cin >> choice;
+    }
     
     return 0;
 }

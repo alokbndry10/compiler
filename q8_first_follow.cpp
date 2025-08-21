@@ -233,43 +233,44 @@ public:
 int main() {
     cout << "FIRST and FOLLOW Set Calculator" << endl;
     cout << "===============================" << endl;
+    cout << "Enter grammar productions (Enter 'done' to finish)" << endl;
+    cout << "Format: A->BC or A->a or A->ε" << endl;
+    cout << "Use 'ε' for epsilon productions" << endl;
+    cout << "First production's LHS will be the start symbol" << endl << endl;
     
-    // Example 1: Simple arithmetic grammar
-    cout << "Example 1: Arithmetic Expression Grammar" << endl;
-    cout << "----------------------------------------" << endl;
-    FirstFollowCalculator calc1;
-    calc1.addProduction('E', "TX");
-    calc1.addProduction('X', "+TX");
-    calc1.addProduction('X', "ε");
-    calc1.addProduction('T', "FY");
-    calc1.addProduction('Y', "*FY");
-    calc1.addProduction('Y', "ε");
-    calc1.addProduction('F', "(E)");
-    calc1.addProduction('F', "id");
+    FirstFollowCalculator calc;
+    string production;
     
-    calc1.printGrammar();
-    calc1.calculateFirst();
-    calc1.printFirst();
-    calc1.calculateFollow();
-    calc1.printFollow();
+    while (true) {
+        cout << "Enter production: ";
+        cin >> production;
+        
+        if (production == "done") break;
+        
+        // Parse production A->BC
+        size_t arrowPos = production.find("->");
+        if (arrowPos == string::npos) {
+            cout << "Invalid format! Use A->BC" << endl;
+            continue;
+        }
+        
+        char lhs = production[0];
+        string rhs = production.substr(arrowPos + 2);
+        
+        calc.addProduction(lhs, rhs);
+        cout << "Added: " << lhs << " -> " << rhs << endl;
+    }
     
-    cout << string(60, '=') << endl;
+    cout << "\n";
+    calc.printGrammar();
     
-    // Example 2: Simple grammar with epsilon
-    cout << "Example 2: Grammar with Epsilon Productions" << endl;
-    cout << "-------------------------------------------" << endl;
-    FirstFollowCalculator calc2;
-    calc2.addProduction('S', "AB");
-    calc2.addProduction('A', "a");
-    calc2.addProduction('A', "ε");
-    calc2.addProduction('B', "b");
-    calc2.addProduction('B', "c");
+    cout << "Calculating FIRST sets..." << endl;
+    calc.calculateFirst();
+    calc.printFirst();
     
-    calc2.printGrammar();
-    calc2.calculateFirst();
-    calc2.printFirst();
-    calc2.calculateFollow();
-    calc2.printFollow();
+    cout << "Calculating FOLLOW sets..." << endl;
+    calc.calculateFollow();
+    calc.printFollow();
     
     return 0;
 }

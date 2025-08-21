@@ -35,33 +35,30 @@ bool matches_abb(const string& s) {
 }
 
 int main() {
-    vector<string> test_strings = {
-        "", "a", "aa", "aaa", "b", "bb", "ab", "aab", "abb", "abbb", "aabb", "abab", "baa", "abc"
-    };
+    string input;
+    char choice;
     
     cout << "String Pattern Recognition Program" << endl;
     cout << "==================================" << endl;
+    cout << "Patterns:" << endl;
+    cout << "1. a* - Zero or more 'a's" << endl;
+    cout << "2. a*b* - Zero or more 'a's followed by zero or more 'b's" << endl;
+    cout << "3. abb - Exact string 'abb'" << endl << endl;
     
-    for (const string& str : test_strings) {
-        cout << "\nTesting string: \"" << str << "\"" << endl;
+    do {
+        cout << "Enter a string to test: ";
+        cin >> input;
         
-        cout << "Matches a*: " << (matches_a_star(str) ? "YES" : "NO") << endl;
-        cout << "Matches a*b*: " << (matches_a_star_b_star(str) ? "YES" : "NO") << endl;
-        cout << "Matches abb: " << (matches_abb(str) ? "YES" : "NO") << endl;
-        
-        cout << "------------------------" << endl;
-    }
-    
-    // Interactive mode
-    string input;
-    cout << "\nEnter a string to test (or 'quit' to exit): ";
-    while (cin >> input && input != "quit") {
         cout << "\nTesting string: \"" << input << "\"" << endl;
         cout << "Matches a*: " << (matches_a_star(input) ? "YES" : "NO") << endl;
         cout << "Matches a*b*: " << (matches_a_star_b_star(input) ? "YES" : "NO") << endl;
         cout << "Matches abb: " << (matches_abb(input) ? "YES" : "NO") << endl;
-        cout << "\nEnter another string (or 'quit' to exit): ";
-    }
+        
+        cout << "\nDo you want to test another string? (y/n): ";
+        cin >> choice;
+        cout << endl;
+        
+    } while (choice == 'y' || choice == 'Y');
     
     return 0;
 }

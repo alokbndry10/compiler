@@ -177,41 +177,43 @@ public:
 int main() {
     cout << "Left Recursion Removal Program" << endl;
     cout << "==============================" << endl;
+    cout << "Enter grammar productions (Enter 'done' to finish)" << endl;
+    cout << "Format: A->Aa|b (use | to separate alternatives)" << endl;
+    cout << "Note: This program handles direct left recursion" << endl << endl;
     
-    // Example 1: Simple direct left recursion
-    cout << "Example 1: Direct Left Recursion" << endl;
-    cout << "---------------------------------" << endl;
-    LeftRecursionRemover remover1;
-    remover1.addProduction('A', "Aa");
-    remover1.addProduction('A', "b");
-    remover1.removeLeftRecursion();
+    LeftRecursionRemover remover;
+    string input;
     
-    cout << string(60, '=') << endl;
+    while (true) {
+        cout << "Enter production: ";
+        cin >> input;
+        
+        if (input == "done") break;
+        
+        // Parse production A->Aa|b
+        size_t arrowPos = input.find("->");
+        if (arrowPos == string::npos) {
+            cout << "Invalid format! Use A->Aa|b" << endl;
+            continue;
+        }
+        
+        char lhs = input[0];
+        string rhsString = input.substr(arrowPos + 2);
+        
+        // Split by |
+        size_t pos = 0;
+        while ((pos = rhsString.find('|')) != string::npos) {
+            string rhs = rhsString.substr(0, pos);
+            remover.addProduction(lhs, rhs);
+            rhsString.erase(0, pos + 1);
+        }
+        remover.addProduction(lhs, rhsString); // Last part
+        
+        cout << "Added productions for " << lhs << endl;
+    }
     
-    // Example 2: Multiple alternatives with left recursion
-    cout << "Example 2: Multiple Alternatives" << endl;
-    cout << "--------------------------------" << endl;
-    LeftRecursionRemover remover2;
-    remover2.addProduction('E', "E+T");
-    remover2.addProduction('E', "E-T");
-    remover2.addProduction('E', "T");
-    remover2.addProduction('T', "T*F");
-    remover2.addProduction('T', "F");
-    remover2.addProduction('F', "(E)");
-    remover2.addProduction('F', "id");
-    remover2.removeLeftRecursion();
-    
-    cout << string(60, '=') << endl;
-    
-    // Example 3: Indirect left recursion
-    cout << "Example 3: Indirect Left Recursion" << endl;
-    cout << "-----------------------------------" << endl;
-    LeftRecursionRemover remover3;
-    remover3.addProduction('A', "Ba");
-    remover3.addProduction('A', "c");
-    remover3.addProduction('B', "Ab");
-    remover3.addProduction('B', "d");
-    remover3.removeLeftRecursion();
+    cout << "\n";
+    remover.removeLeftRecursion();
     
     return 0;
 }

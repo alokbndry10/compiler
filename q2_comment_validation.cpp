@@ -18,36 +18,38 @@ bool is_valid_comment(const string& s) {
 }
 
 int main() {
-    vector<string> test_cases = {
-        "// This is a single line comment",
-        "/* This is a multi-line comment */",
-        "/* Multi-line\n   comment\n   example */",
-        "// Another single line",
-        "/* Invalid comment",
-        "Invalid // comment",
-        "/ Not a comment",
-        "/* */",
-        "//"
-    };
+    string input;
+    char choice;
     
     cout << "Comment Validation Program" << endl;
     cout << "==========================" << endl;
+    cout << "Supports C/C++ style comments:" << endl;
+    cout << "1. Single-line: // comment" << endl;
+    cout << "2. Multi-line: /* comment */" << endl << endl;
     
-    for (const string& test : test_cases) {
-        cout << "\nInput: \"" << test << "\"" << endl;
+    do {
+        cout << "Enter a string to validate: ";
+        getline(cin, input);
         
-        if (is_single_line_comment(test)) {
+        cout << "\nInput: \"" << input << "\"" << endl;
+        
+        if (is_single_line_comment(input)) {
             cout << "Type: Single-line comment" << endl;
             cout << "Valid: YES" << endl;
-        } else if (is_multi_line_comment(test)) {
+        } else if (is_multi_line_comment(input)) {
             cout << "Type: Multi-line comment" << endl;
             cout << "Valid: YES" << endl;
         } else {
-            cout << "Type: Not a comment" << endl;
+            cout << "Type: Not a valid comment" << endl;
             cout << "Valid: NO" << endl;
         }
-        cout << "------------------------" << endl;
-    }
+        
+        cout << "\nDo you want to test another string? (y/n): ";
+        cin >> choice;
+        cin.ignore(); // Clear input buffer
+        cout << endl;
+        
+    } while (choice == 'y' || choice == 'Y');
     
     return 0;
 }

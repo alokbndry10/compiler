@@ -358,17 +358,35 @@ public:
 int main() {
     cout << "LL(1) Parser Implementation" << endl;
     cout << "===========================" << endl;
-    
-    // Example 1: Simple arithmetic grammar
-    cout << "Example 1: Simple Grammar" << endl;
-    cout << "-------------------------" << endl;
+    cout << "Enter grammar productions (Enter 'done' to finish)" << endl;
+    cout << "Format: A->BC or A->a or A->ε" << endl;
+    cout << "Use 'ε' for epsilon productions" << endl;
+    cout << "First production's LHS will be the start symbol" << endl << endl;
     
     LL1Parser parser;
-    parser.addProduction('S', "AB");
-    parser.addProduction('A', "a");
-    parser.addProduction('A', "ε");
-    parser.addProduction('B', "b");
+    string production;
     
+    while (true) {
+        cout << "Enter production: ";
+        cin >> production;
+        
+        if (production == "done") break;
+        
+        // Parse production A->BC
+        size_t arrowPos = production.find("->");
+        if (arrowPos == string::npos) {
+            cout << "Invalid format! Use A->BC" << endl;
+            continue;
+        }
+        
+        char lhs = production[0];
+        string rhs = production.substr(arrowPos + 2);
+        
+        parser.addProduction(lhs, rhs);
+        cout << "Added: " << lhs << " -> " << rhs << endl;
+    }
+    
+    cout << "\n";
     parser.printGrammar();
     parser.calculateFirst();
     parser.printFirst();
@@ -377,14 +395,21 @@ int main() {
     parser.constructParseTable();
     parser.printParseTable();
     
-    // Test cases
-    vector<string> testCases = {"ab", "b", "aab", "bb"};
+    string input;
+    char choice;
     
-    for (const string& test : testCases) {
+    do {
+        cout << "Enter string to parse: ";
+        cin >> input;
+        
         cout << "\n";
-        parser.parse(test);
-        cout << "\n" << string(60, '=') << "\n";
-    }
+        bool result = parser.parse(input);
+        
+        cout << "\nDo you want to parse another string? (y/n): ";
+        cin >> choice;
+        cout << endl;
+        
+    } while (choice == 'y' || choice == 'Y');
     
     return 0;
 }

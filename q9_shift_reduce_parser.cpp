@@ -178,47 +178,51 @@ public:
 int main() {
     cout << "Shift-Reduce Parser Implementation" << endl;
     cout << "==================================" << endl;
+    cout << "Enter grammar productions (Enter 'done' to finish)" << endl;
+    cout << "Format: A->BC or A->a" << endl;
+    cout << "First production's LHS will be the start symbol" << endl << endl;
     
-    // Example 1: Simple arithmetic grammar
-    cout << "Example 1: Simple Arithmetic Grammar" << endl;
-    cout << "------------------------------------" << endl;
+    ShiftReduceParser parser;
+    string production;
     
-    ShiftReduceParser parser1;
-    parser1.addProduction('E', "E+T");
-    parser1.addProduction('E', "T");
-    parser1.addProduction('T', "T*F");
-    parser1.addProduction('T', "F");
-    parser1.addProduction('F', "(E)");
-    parser1.addProduction('F', "id");
-    
-    parser1.printGrammar();
-    
-    // Test cases
-    vector<string> testCases1 = {"id", "id+id", "id*id", "(id)", "id+id*id"};
-    
-    for (const string& test : testCases1) {
-        cout << "\n";
-        parser1.parse(test);
-        cout << "\n" << string(60, '=') << "\n";
+    while (true) {
+        cout << "Enter production: ";
+        cin >> production;
+        
+        if (production == "done") break;
+        
+        // Parse production A->BC
+        size_t arrowPos = production.find("->");
+        if (arrowPos == string::npos) {
+            cout << "Invalid format! Use A->BC" << endl;
+            continue;
+        }
+        
+        char lhs = production[0];
+        string rhs = production.substr(arrowPos + 2);
+        
+        parser.addProduction(lhs, rhs);
+        cout << "Added: " << lhs << " -> " << rhs << endl;
     }
     
-    // Example 2: Simpler grammar
-    cout << "\nExample 2: Simpler Grammar" << endl;
-    cout << "--------------------------" << endl;
+    cout << "\n";
+    parser.printGrammar();
     
-    ShiftReduceParser parser2;
-    parser2.addProduction('S', "aA");
-    parser2.addProduction('A', "b");
+    string input;
+    char choice;
     
-    parser2.printGrammar();
-    
-    vector<string> testCases2 = {"ab", "aab", "ba", "a", "b"};
-    
-    for (const string& test : testCases2) {
+    do {
+        cout << "Enter string to parse: ";
+        cin >> input;
+        
         cout << "\n";
-        parser2.parse(test);
-        cout << "\n" << string(60, '=') << "\n";
-    }
+        bool result = parser.parse(input);
+        
+        cout << "\nDo you want to parse another string? (y/n): ";
+        cin >> choice;
+        cout << endl;
+        
+    } while (choice == 'y' || choice == 'Y');
     
     return 0;
 }

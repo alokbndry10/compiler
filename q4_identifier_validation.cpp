@@ -60,44 +60,28 @@ void analyze_identifier(const string& identifier) {
 }
 
 int main() {
-    vector<string> test_identifiers = {
-        "variable",
-        "_variable",
-        "var123",
-        "_123var",
-        "123var",
-        "var_name",
-        "VarName",
-        "var-name",
-        "var name",
-        "var$",
-        "_",
-        "a",
-        "",
-        "class",
-        "myVariable_123"
-    };
+    string identifier;
+    char choice;
     
     cout << "Identifier Validation Program" << endl;
     cout << "=============================" << endl;
+    cout << "Rules for valid identifiers:" << endl;
+    cout << "1. Must start with a letter (a-z, A-Z) or underscore (_)" << endl;
+    cout << "2. Can contain letters, digits (0-9), and underscores" << endl;
+    cout << "3. Cannot be empty" << endl << endl;
     
-    for (const string& identifier : test_identifiers) {
+    do {
+        cout << "Enter an identifier to validate: ";
+        cin >> identifier;
+        
         cout << "\n";
         analyze_identifier(identifier);
-        cout << "------------------------" << endl;
-    }
-    
-    // Interactive mode
-    string input;
-    cout << "\nEnter an identifier to validate (or 'quit' to exit): ";
-    while (getline(cin, input) && input != "quit") {
-        if (!input.empty()) {
-            cout << "\n";
-            analyze_identifier(input);
-            cout << "------------------------" << endl;
-        }
-        cout << "\nEnter another identifier (or 'quit' to exit): ";
-    }
+        
+        cout << "\nDo you want to test another identifier? (y/n): ";
+        cin >> choice;
+        cout << endl;
+        
+    } while (choice == 'y' || choice == 'Y');
     
     return 0;
 }
