@@ -39,7 +39,7 @@ public:
         for (char c : rhs) {
             if (c >= 'A' && c <= 'Z') {
                 nonTerminals.insert(c);
-            } else if (c != 'ε') {
+            } else if (c != '#') {
                 terminals.insert(c);
             }
         }
@@ -59,9 +59,9 @@ public:
                 char A = prod.lhs;
                 string alpha = prod.rhs;
                 
-                if (alpha == "ε") {
-                    if (first[A].find('ε') == first[A].end()) {
-                        first[A].insert('ε');
+                if (alpha == "#") {
+                    if (first[A].find('#') == first[A].end()) {
+                        first[A].insert('#');
                         changed = true;
                     }
                 } else {
@@ -78,20 +78,20 @@ public:
                             allDeriveEpsilon = false;
                         } else {
                             for (char symbol : first[X]) {
-                                if (symbol != 'ε' && first[A].find(symbol) == first[A].end()) {
+                                if (symbol != '#' && first[A].find(symbol) == first[A].end()) {
                                     first[A].insert(symbol);
                                     changed = true;
                                 }
                             }
                             
-                            if (first[X].find('ε') == first[X].end()) {
+                            if (first[X].find('#') == first[X].end()) {
                                 allDeriveEpsilon = false;
                             }
                         }
                     }
                     
-                    if (allDeriveEpsilon && first[A].find('ε') == first[A].end()) {
-                        first[A].insert('ε');
+                    if (allDeriveEpsilon && first[A].find('#') == first[A].end()) {
+                        first[A].insert('#');
                         changed = true;
                     }
                 }
@@ -132,18 +132,18 @@ public:
                                 break;
                             } else {
                                 for (char f : first[symbol]) {
-                                    if (f != 'ε') {
+                                    if (f != '#') {
                                         firstGamma.insert(f);
                                     }
                                 }
-                                if (first[symbol].find('ε') == first[symbol].end()) {
+                                if (first[symbol].find('#') == first[symbol].end()) {
                                     gammaDerivesEpsilon = false;
                                     break;
                                 }
                             }
                         }
                         
-                        // Add FIRST(γ) - {ε} to FOLLOW(B)
+                        // Add FIRST(γ) - {#} to FOLLOW(B)
                         for (char symbol : firstGamma) {
                             if (follow[B].find(symbol) == follow[B].end()) {
                                 follow[B].insert(symbol);
@@ -151,7 +151,7 @@ public:
                             }
                         }
                         
-                        // If γ derives ε, add FOLLOW(A) to FOLLOW(B)
+                        // If γ derives #, add FOLLOW(A) to FOLLOW(B)
                         if (gammaDerivesEpsilon || gamma.empty()) {
                             for (char symbol : follow[A]) {
                                 if (follow[B].find(symbol) == follow[B].end()) {
@@ -176,8 +176,8 @@ public:
             set<char> firstAlpha;
             bool alphaDerivesEpsilon = true;
             
-            if (alpha == "ε") {
-                firstAlpha.insert('ε');
+            if (alpha == "#") {
+                firstAlpha.insert('#');
             } else {
                 for (char symbol : alpha) {
                     if (terminals.find(symbol) != terminals.end()) {
@@ -186,30 +186,30 @@ public:
                         break;
                     } else {
                         for (char f : first[symbol]) {
-                            if (f != 'ε') {
+                            if (f != '#') {
                                 firstAlpha.insert(f);
                             }
                         }
-                        if (first[symbol].find('ε') == first[symbol].end()) {
+                        if (first[symbol].find('#') == first[symbol].end()) {
                             alphaDerivesEpsilon = false;
                             break;
                         }
                     }
                 }
                 if (alphaDerivesEpsilon) {
-                    firstAlpha.insert('ε');
+                    firstAlpha.insert('#');
                 }
             }
             
             // For each terminal a in FIRST(α), add A -> α to M[A, a]
             for (char a : firstAlpha) {
-                if (a != 'ε') {
+                if (a != '#') {
                     parseTable[{A, a}] = i;
                 }
             }
             
-            // If ε in FIRST(α), for each b in FOLLOW(A), add A -> α to M[A, b]
-            if (firstAlpha.find('ε') != firstAlpha.end()) {
+            // If # in FIRST(α), for each b in FOLLOW(A), add A -> α to M[A, b]
+            if (firstAlpha.find('#') != firstAlpha.end()) {
                 for (char b : follow[A]) {
                     parseTable[{A, b}] = i;
                 }
@@ -331,7 +331,7 @@ public:
                     
                     parseStack.pop();
                     
-                    if (prod.rhs != "ε") {
+                    if (prod.rhs != "#") {
                         for (int j = prod.rhs.length() - 1; j >= 0; j--) {
                             parseStack.push(prod.rhs[j]);
                         }
@@ -359,8 +359,8 @@ int main() {
     cout << "LL(1) Parser Implementation" << endl;
     cout << "===========================" << endl;
     cout << "Enter grammar productions (Enter 'done' to finish)" << endl;
-    cout << "Format: A->BC or A->a or A->ε" << endl;
-    cout << "Use 'ε' for epsilon productions" << endl;
+    cout << "Format: A->BC or A->a or A-># (for epsilon)" << endl;
+    cout << "Use '#' for epsilon productions" << endl;
     cout << "First production's LHS will be the start symbol" << endl << endl;
     
     LL1Parser parser;

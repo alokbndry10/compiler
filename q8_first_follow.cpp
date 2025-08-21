@@ -1,11 +1,10 @@
-// Question 8: Write a program to find out FIRST and FOLLOW of grammar
-
 #include <iostream>
 #include <string>
 #include <vector>
 #include <map>
 #include <set>
 #include <algorithm>
+
 using namespace std;
 
 struct Production {
@@ -20,34 +19,31 @@ private:
     vector<Production> productions;
     map<char, set<char>> first;
     map<char, set<char>> follow;
-    set<char> terminals;
     set<char> non_terminals;
+    set<char> terminals;
     char start_symbol;
     
 public:
-    FirstFollowCalculator(char start = 'S') : start_symbol(start) {}
+    FirstFollowCalculator() : start_symbol('\0') {}
     
     void addProduction(char lhs, string rhs) {
         productions.push_back(Production(lhs, rhs));
         non_terminals.insert(lhs);
         
-        if (productions.size() == 1) {
-            start_symbol = lhs; // First production's LHS is start symbol
+        if (start_symbol == '\0') {
+            start_symbol = lhs;
         }
         
         for (char c : rhs) {
-            if (c >= 'A' && c <= 'Z') {
-                non_terminals.insert(c);
-            } else if (c != 'ε') {
+            if (c != '#' && (c < 'A' || c > 'Z')) {
                 terminals.insert(c);
             }
         }
     }
     
     void calculateFirst() {
-        cout << "Calculating FIRST sets..." << endl;
+        cout << "\nCalculating FIRST sets..." << endl;
         
-        // Initialize FIRST sets
         for (char nt : non_terminals) {
             first[nt] = set<char>();
         }
@@ -60,68 +56,60 @@ public:
                 char A = prod.lhs;
                 string alpha = prod.rhs;
                 
-                cout << "Processing: " << A << " -> " << alpha << endl;
-                
-                if (alpha == "ε") {
-                    if (first[A].find('ε') == first[A].end()) {
-                        first[A].insert('ε');
+                if (alpha == "#") {
+                    if (first[A].find('#') == first[A].end()) {
+                        first[A].insert('#');
                         changed = true;
-                        cout << "  Added ε to FIRST(" << A << ")" << endl;
                     }
                 } else {
-                    bool all_derive_epsilon = true;
+                    int k = 0;
+                    bool canDeriveEpsilon = true;
                     
-                    for (size_t i = 0; i < alpha.length() && all_derive_epsilon; i++) {
-                        char X = alpha[i];
-                        
-                        if (terminals.find(X) != terminals.end()) {
-                            // X is terminal
+                    for (char X : alpha) {
+                        if (X < 'A' || X > 'Z') {
                             if (first[A].find(X) == first[A].end()) {
                                 first[A].insert(X);
                                 changed = true;
-                                cout << "  Added " << X << " to FIRST(" << A << ")" << endl;
                             }
-                            all_derive_epsilon = false;
+                            canDeriveEpsilon = false;
+                            break;
                         } else {
-                            // X is non-terminal
-                            set<char> first_X = first[X];
-                            
-                            for (char symbol : first_X) {
-                                if (symbol != 'ε' && first[A].find(symbol) == first[A].end()) {
-                                    first[A].insert(symbol);
-                                    changed = true;
-                                    cout << "  Added " << symbol << " to FIRST(" << A << ") from FIRST(" << X << ")" << endl;
+                            for (char symbol : first[X]) {
+                                if (symbol != '#') {
+                                    if (first[A].find(symbol) == first[A].end()) {
+                                        first[A].insert(symbol);
+                                        changed = true;
+                                    }
                                 }
                             }
                             
-                            if (first_X.find('ε') == first_X.end()) {
-                                all_derive_epsilon = false;
+                            if (first[X].find('#') == first[X].end()) {
+                                canDeriveEpsilon = false;
+                                break;
                             }
                         }
+                        k++;
                     }
                     
-                    if (all_derive_epsilon && first[A].find('ε') == first[A].end()) {
-                        first[A].insert('ε');
-                        changed = true;
-                        cout << "  Added ε to FIRST(" << A << ") - all symbols derive ε" << endl;
+                    if (canDeriveEpsilon && k == alpha.length()) {
+                        if (first[A].find('#') == first[A].end()) {
+                            first[A].insert('#');
+                            changed = true;
+                        }
                     }
                 }
-                cout << endl;
             }
         }
     }
     
     void calculateFollow() {
-        cout << "Calculating FOLLOW sets..." << endl;
+        cout << "\nCalculating FOLLOW sets..." << endl;
         
-        // Initialize FOLLOW sets
         for (char nt : non_terminals) {
             follow[nt] = set<char>();
         }
         
-        // Add $ to FOLLOW of start symbol
         follow[start_symbol].insert('$');
-        cout << "Added $ to FOLLOW(" << start_symbol << ") - start symbol" << endl;
         
         bool changed = true;
         while (changed) {
@@ -131,144 +119,134 @@ public:
                 char A = prod.lhs;
                 string beta = prod.rhs;
                 
-                cout << "Processing: " << A << " -> " << beta << endl;
-                
-                for (size_t i = 0; i < beta.length(); i++) {
+                for (int i = 0; i < beta.length(); i++) {
                     char B = beta[i];
                     
-                    if (non_terminals.find(B) != non_terminals.end()) {
-                        // B is a non-terminal
+                    if (B >= 'A' && B <= 'Z') {
                         string gamma = beta.substr(i + 1);
                         
-                        // Calculate FIRST(γ)
-                        set<char> first_gamma;
-                        bool gamma_derives_epsilon = true;
-                        
-                        for (char symbol : gamma) {
-                            if (terminals.find(symbol) != terminals.end()) {
-                                first_gamma.insert(symbol);
-                                gamma_derives_epsilon = false;
-                                break;
-                            } else {
-                                for (char f : first[symbol]) {
-                                    if (f != 'ε') {
-                                        first_gamma.insert(f);
-                                    }
-                                }
-                                if (first[symbol].find('ε') == first[symbol].end()) {
-                                    gamma_derives_epsilon = false;
-                                    break;
-                                }
-                            }
-                        }
-                        
-                        // Add FIRST(γ) - {ε} to FOLLOW(B)
-                        for (char symbol : first_gamma) {
-                            if (follow[B].find(symbol) == follow[B].end()) {
-                                follow[B].insert(symbol);
-                                changed = true;
-                                cout << "  Added " << symbol << " to FOLLOW(" << B << ") from FIRST(γ)" << endl;
-                            }
-                        }
-                        
-                        // If γ derives ε, add FOLLOW(A) to FOLLOW(B)
-                        if (gamma_derives_epsilon || gamma.empty()) {
+                        if (gamma.empty()) {
                             for (char symbol : follow[A]) {
                                 if (follow[B].find(symbol) == follow[B].end()) {
                                     follow[B].insert(symbol);
                                     changed = true;
-                                    cout << "  Added " << symbol << " to FOLLOW(" << B << ") from FOLLOW(" << A << ")" << endl;
+                                }
+                            }
+                        } else {
+                            bool allDeriveEpsilon = true;
+                            
+                            for (char X : gamma) {
+                                if (X < 'A' || X > 'Z') {
+                                    if (follow[B].find(X) == follow[B].end()) {
+                                        follow[B].insert(X);
+                                        changed = true;
+                                    }
+                                    allDeriveEpsilon = false;
+                                    break;
+                                } else {
+                                    for (char symbol : first[X]) {
+                                        if (symbol != '#') {
+                                            if (follow[B].find(symbol) == follow[B].end()) {
+                                                follow[B].insert(symbol);
+                                                changed = true;
+                                            }
+                                        }
+                                    }
+                                    
+                                    if (first[X].find('#') == first[X].end()) {
+                                        allDeriveEpsilon = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if (allDeriveEpsilon) {
+                                for (char symbol : follow[A]) {
+                                    if (follow[B].find(symbol) == follow[B].end()) {
+                                        follow[B].insert(symbol);
+                                        changed = true;
+                                    }
                                 }
                             }
                         }
                     }
                 }
-                cout << endl;
             }
         }
     }
     
     void printGrammar() {
-        cout << "Grammar Productions:" << endl;
+        cout << "\nGrammar Productions:" << endl;
         for (const Production& prod : productions) {
             cout << prod.lhs << " -> " << prod.rhs << endl;
         }
         cout << "Start Symbol: " << start_symbol << endl;
-        cout << endl;
     }
     
     void printFirst() {
-        cout << "FIRST Sets:" << endl;
-        cout << string(20, '-') << endl;
-        for (const auto& pair : first) {
-            cout << "FIRST(" << pair.first << ") = {";
-            bool isFirst = true;
-            for (char symbol : pair.second) {
-                if (!isFirst) cout << ", ";
+        cout << "\nFIRST Sets:" << endl;
+        cout << "--------------------" << endl;
+        for (char nt : non_terminals) {
+            cout << "FIRST(" << nt << ") = {";
+            bool first_item = true;
+            for (char symbol : first[nt]) {
+                if (!first_item) cout << ", ";
                 cout << symbol;
-                isFirst = false;
+                first_item = false;
             }
             cout << "}" << endl;
         }
-        cout << endl;
     }
     
     void printFollow() {
-        cout << "FOLLOW Sets:" << endl;
-        cout << string(20, '-') << endl;
-        for (const auto& pair : follow) {
-            cout << "FOLLOW(" << pair.first << ") = {";
-            bool isFirst = true;
-            for (char symbol : pair.second) {
-                if (!isFirst) cout << ", ";
+        cout << "\nFOLLOW Sets:" << endl;
+        cout << "--------------------" << endl;
+        for (char nt : non_terminals) {
+            cout << "FOLLOW(" << nt << ") = {";
+            bool first_item = true;
+            for (char symbol : follow[nt]) {
+                if (!first_item) cout << ", ";
                 cout << symbol;
-                isFirst = false;
+                first_item = false;
             }
             cout << "}" << endl;
         }
-        cout << endl;
     }
 };
 
 int main() {
-    cout << "FIRST and FOLLOW Set Calculator" << endl;
-    cout << "===============================" << endl;
-    cout << "Enter grammar productions (Enter 'done' to finish)" << endl;
-    cout << "Format: A->BC or A->a or A->ε" << endl;
-    cout << "Use 'ε' for epsilon productions" << endl;
-    cout << "First production's LHS will be the start symbol" << endl << endl;
-    
     FirstFollowCalculator calc;
     string production;
     
+    cout << "FIRST and FOLLOW Set Calculator" << endl;
+    cout << "===============================" << endl;
+    cout << "Enter grammar productions (Enter 'done' to finish)" << endl;
+    cout << "Format: A->BC or A->a or A-># (for epsilon)" << endl;
+    cout << "Use '#' for epsilon productions" << endl;
+    cout << "First production's LHS will be the start symbol" << endl;
+    cout << endl;
+    
     while (true) {
         cout << "Enter production: ";
-        cin >> production;
+        getline(cin, production);
         
-        if (production == "done") break;
-        
-        // Parse production A->BC
-        size_t arrowPos = production.find("->");
-        if (arrowPos == string::npos) {
-            cout << "Invalid format! Use A->BC" << endl;
-            continue;
+        if (production == "done") {
+            break;
         }
         
-        char lhs = production[0];
-        string rhs = production.substr(arrowPos + 2);
-        
-        calc.addProduction(lhs, rhs);
-        cout << "Added: " << lhs << " -> " << rhs << endl;
+        if (production.find("->") != string::npos) {
+            char lhs = production[0];
+            string rhs = production.substr(production.find("->") + 2);
+            calc.addProduction(lhs, rhs);
+            cout << "Added: " << lhs << " -> " << rhs << endl;
+        } else {
+            cout << "Invalid format! Use A->BC" << endl;
+        }
     }
     
-    cout << "\n";
     calc.printGrammar();
-    
-    cout << "Calculating FIRST sets..." << endl;
     calc.calculateFirst();
     calc.printFirst();
-    
-    cout << "Calculating FOLLOW sets..." << endl;
     calc.calculateFollow();
     calc.printFollow();
     
